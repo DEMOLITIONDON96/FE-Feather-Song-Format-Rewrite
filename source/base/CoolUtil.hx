@@ -71,7 +71,7 @@ class CoolUtil
 
 		try
 		{
-			var unfilteredLibrary = FileSystem.readDirectory('$subDir/$library');
+			var unfilteredLibrary = FileSystem.readDirectory(SUtil.getStorageDirectory() + '$subDir/$library');
 
 			for (folder in unfilteredLibrary)
 			{
@@ -126,8 +126,8 @@ class CoolUtil
 
 		var path:String = Paths.getPath(file);
 
-		var absolutePath:String = FileSystem.absolutePath(path);
-		var directory:Array<String> = FileSystem.readDirectory(absolutePath);
+		var absolutePath:String = FileSystem.absolutePath(SUtil.getStorageDirectory() + path);
+		var directory:Array<String> = FileSystem.readDirectory(SUtil.getStorageDirectory() + absolutePath);
 
 		if (directory != null)
 		{
