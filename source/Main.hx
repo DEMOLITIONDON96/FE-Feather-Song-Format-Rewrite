@@ -128,8 +128,8 @@ class Main extends Sprite
 	{
 		var rawJson:String = null;
 
-		if (FileSystem.exists(path))
-			rawJson = File.getContent(path);
+		if (FileSystem.exists(SUtil.getStorageDirectory() + path))
+			rawJson = File.getContent(SUtil.getStorageDirectory() + path);
 
 		return Json.parse(rawJson);
 	}
@@ -145,7 +145,11 @@ class Main extends Sprite
 	{
 		super();
 
+		#if mobile
+		SUtil.uncaughtErrorHandler();
+		#else
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		#end
 
 		/**
 		 * locking neko platforms on 60 because similar to html5 it cannot go over that
@@ -175,6 +179,8 @@ class Main extends Sprite
 
 		FlxTransitionableState.skipNextTransIn = true;
 
+		SUtil.checkPermissions();
+
 		// here we set up the base game
 		var gameCreate:FlxGame;
 		gameCreate = new FlxGame(gameWidth, gameHeight, Init, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash);
@@ -189,10 +195,8 @@ class Main extends Sprite
 		Discord.changePresence('');
 		#end
 
-		#if !mobile
 		infoCounter = new Overlay(0, 0);
 		addChild(infoCounter);
-		#end
 
 		#if SHOW_CONSOLE
 		infoConsole = new Console();
