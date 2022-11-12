@@ -54,7 +54,7 @@
 	<haxelib name="discord_rpc" if="DISCORD_RPC" />
 
 	<haxelib name="hxCodec" if="VIDEO_PLUGIN" />
-	<haxelib name="SScript" if="desktop" />
+	<haxelib name="SScript" />
 	<haxelib name="hxcpp-debug-server" if="debug" />
 	<haxelib name="extension-androidtools" if="android" />
 
