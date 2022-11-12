@@ -99,7 +99,7 @@ class Character extends FNFSprite
 		if (animation.getByName('danceRight') != null)
 			danceIdle = true;
 
-		if (FileSystem.exists(Paths.characterModule(character, character, PSYCH_ENGINE)))
+		if (FileSystem.exists(SUtil.getStorageDirectory() + Paths.characterModule(character, character, PSYCH_ENGINE)))
 			characterType = PSYCH_ENGINE;
 
 		switch (curCharacter)
@@ -564,8 +564,8 @@ class Character extends FNFSprite
 		var rawJson:String = null;
 		var json:PsychEngineChar = null;
 
-		if (FileSystem.exists(Paths.characterModule(char, char, PSYCH_ENGINE)))
-			rawJson = File.getContent(Paths.characterModule(char, char, PSYCH_ENGINE));
+		if (FileSystem.exists(SUtil.getStorageDirectory() + Paths.characterModule(char, char, PSYCH_ENGINE)))
+			rawJson = File.getContent(SUtil.getStorageDirectory() + Paths.characterModule(char, char, PSYCH_ENGINE));
 
 		if (rawJson != null)
 			json = cast Json.parse(rawJson);
@@ -574,7 +574,7 @@ class Character extends FNFSprite
 
 		try
 		{
-			var textAsset:String = Paths.characterModule(char, json.image.replace('characters/', '') + '.txt');
+			var textAsset:String = SUtil.getStorageDirectory() + Paths.characterModule(char, json.image.replace('characters/', '') + '.txt');
 
 			if (FileSystem.exists(textAsset))
 				spriteType = "PackerAtlas";
