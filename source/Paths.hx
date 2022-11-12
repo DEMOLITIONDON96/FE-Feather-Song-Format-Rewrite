@@ -123,7 +123,7 @@ class Paths
 
 	public static function returnGraphic(key:String, ?folder:String, ?library:String, ?gpuRender:Bool = false)
 	{
-		var path = getPath(folder.length > 1 ? '$folder/$key.png' : '$key.png', IMAGE, library);
+		var path = SUtil.getStorageDirectory() + getPath(folder.length > 1 ? '$folder/$key.png' : '$key.png', IMAGE, library);
 		if (FileSystem.exists(path))
 		{
 			if (!currentTrackedAssets.exists(key))
@@ -156,16 +156,15 @@ class Paths
 
 	public static function getTextFile(key:String, type:AssetType = TEXT, ?library:Null<String>):String
 	{
-		if (FileSystem.exists(getPath(key, type, library)))
-			return File.getContent(getPath(key, type, library));
+		if (FileSystem.exists(SUtil.getStorageDirectory() + getPath(key, type, library)))
+			return File.getContent(SUtil.getStorageDirectory() + getPath(key, type, library));
 
 		if (currentLevel != null)
 		{
-			var levelPath:String = '';
-			levelPath = getLibraryPathForce(key, '');
-			if (FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
+			if (FileSystem.exists(SUtil.getStorageDirectory() + getLibraryPathForce(key, '')))
+				return File.getContent(SUtil.getStorageDirectory() + getLibraryPathForce(key, ''));
 		}
+
 		return Assets.getText(getPath(key, type, library));
 	}
 
@@ -180,7 +179,7 @@ class Paths
 
 		// gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		if (!currentTrackedSounds.exists(gottenPath))
-			currentTrackedSounds.set(gottenPath, Sound.fromFile(gottenPath));
+			currentTrackedSounds.set(gottenPath, Sound.fromFile(SUtil.getStorageDirectory() + gottenPath));
 		localTrackedAssets.push(key);
 		return currentTrackedSounds.get(gottenPath);
 	}
@@ -196,7 +195,7 @@ class Paths
 			var caughtExtension:String = null;
 			if (SOUND_EXTS != null)
 			{
-				if (FileSystem.exists(getPath(path + SOUND_EXTS[i], SOUND, library)))
+				if (FileSystem.exists(SUtil.getStorageDirectory() + getPath(path + SOUND_EXTS[i], SOUND, library)))
 					caughtExtension = SOUND_EXTS[i];
 			}
 			// return it;
@@ -258,7 +257,7 @@ class Paths
 	inline static function getPreloadPath(file:String)
 	{
 		var returnPath:String = 'assets/$file';
-		if (!FileSystem.exists(returnPath))
+		if (!FileSystem.exists(SUtil.getStorageDirectory() + returnPath))
 			returnPath = CoolUtil.swapSpaceDash(returnPath);
 		return returnPath;
 	}
@@ -335,7 +334,7 @@ class Paths
 
 		for (extension in extensions)
 		{
-			var newPath:String = getPath('fonts/$key$extension', TEXT, library);
+			var newPath:String = SUtil.getStorageDirectory() + getPath('fonts/$key$extension', TEXT, library);
 			if (FileSystem.exists(newPath))
 			{
 				/*
@@ -369,7 +368,7 @@ class Paths
 
 		for (j in scriptExts)
 		{
-			if (FileSystem.exists(getPath('$folder/$key.$j', TEXT, library)))
+			if (FileSystem.exists(SUtil.getStorageDirectory() + getPath('$folder/$key.$j', TEXT, library)))
 				extension = '.$j';
 			else
 				extension = '.hx';
