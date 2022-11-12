@@ -21,7 +21,7 @@ class Events
 
 		var myEvents:Array<String> = [];
 
-		for (event in sys.FileSystem.readDirectory('assets/events'))
+		for (event in sys.FileSystem.readDirectory(SUtil.getStorageDirectory() + 'assets/events'))
 		{
 			if (event.contains('.'))
 			{
