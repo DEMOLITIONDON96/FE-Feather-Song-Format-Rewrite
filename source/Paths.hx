@@ -354,12 +354,12 @@ class Paths
 	inline static public function getSparrowAtlas(key:String, folder:String = 'images', ?library:String)
 	{
 		var graphic:FlxGraphic = returnGraphic(key, folder, library);
-		return (FlxAtlasFrames.fromSparrow(graphic, File.getContent(file('$folder/$key.xml', library))));
+		return (FlxAtlasFrames.fromSparrow(graphic, File.getContent(SUtil.getStorageDirectory() + file('$folder/$key.xml', library))));
 	}
 
 	inline static public function getPackerAtlas(key:String, folder:String = 'images', ?library:String)
 	{
-		return (FlxAtlasFrames.fromSpriteSheetPacker(image(key, folder, library), file('$folder/$key.txt', library)));
+		return (FlxAtlasFrames.fromSpriteSheetPacker(image(key, folder, library), File.getContent(SUtil.getStorageDirectory() + file('$folder/$key.txr', library))));
 	}
 
 	inline static public function module(key:String, folder:String = 'scripts', ?library:String)
