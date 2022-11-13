@@ -1,7 +1,6 @@
 package base.feather;
 
 import base.feather.ScriptHandler;
-import song.SongFormat.TimedEvent;
 
 using StringTools;
 

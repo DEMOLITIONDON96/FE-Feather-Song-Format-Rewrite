@@ -1,9 +1,5 @@
 package gameObjects;
 
-/**
-	The character class initialises any and all characters that exist within gameplay. For now, the character class will
-	stay the same as it was in the original source of the game. I'll most likely make some changes afterwards though!
-**/
 import base.compatibility.PsychChar;
 import base.feather.ScriptHandler;
 import dependency.FNFSprite;
@@ -42,6 +38,9 @@ typedef CharacterData =
 	var icon:String;
 }
 
+/**
+	The character class initialises any and all characters that exist within gameplay.
+**/
 class Character extends FNFSprite
 {
 	public var debugMode:Bool = false;

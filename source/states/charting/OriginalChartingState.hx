@@ -1,6 +1,5 @@
 package states.charting;
 
-import base.CoolUtil;
 import base.feather.Events;
 import dependency.Discord;
 import flixel.FlxCamera;
@@ -40,7 +39,7 @@ import openfl.net.FileReference;
 import openfl.utils.ByteArray;
 import song.*;
 import song.Conductor.BPMChangeEvent;
-import song.MusicBeat.MusicBeatState;
+import states.MusicBeatState;
 import song.SongFormat;
 
 using StringTools;
