@@ -114,7 +114,7 @@ class FreeplayMenu extends MusicBeatState
 			if (!existingSongs.contains(i.toLowerCase()))
 			{
 				var icon:String = 'gf';
-				var chartExists:Bool = FileSystem.exists(Paths.songJson(i, i));
+				var chartExists:Bool = FileSystem.exists(SUtil.getStorageDirectory() + Paths.songJson(i, i));
 				if (chartExists)
 				{
 					var castSong:SwagSong = Song.loadFromJson(i, i);
@@ -180,8 +180,8 @@ class FreeplayMenu extends MusicBeatState
 		///*
 		var coolDifficultyArray = [];
 		for (i in CoolUtil.difficultyArray)
-			if (FileSystem.exists(Paths.songJson(songName, songName + '-' + i))
-				|| (FileSystem.exists(Paths.songJson(songName, songName)) && i == "NORMAL"))
+			if (FileSystem.exists(SUtil.getStorageDirectory() + Paths.songJson(songName, songName + '-' + i))
+				|| (FileSystem.exists(SUtil.getStorageDirectory() + Paths.songJson(songName, songName)) && i == "NORMAL"))
 				coolDifficultyArray.push(i);
 
 		if (coolDifficultyArray.length > 0)
