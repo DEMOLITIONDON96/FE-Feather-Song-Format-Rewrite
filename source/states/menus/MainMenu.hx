@@ -109,6 +109,8 @@ class MainMenu extends MusicBeatState
 
 		if (logContent != null && logContent.length > 1)
 			logTrace('$logContent', 3, menuHUD);
+
+		states.substates.PauseSubstate.toOptions = false;
 	}
 
 	override function update(elapsed:Float)

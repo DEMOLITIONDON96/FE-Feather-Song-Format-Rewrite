@@ -155,7 +155,7 @@ class TitleState extends MusicBeatState
 
 	function getIntroTextShit():Array<Array<String>>
 	{
-		var swagGoodArray:Array<Array<String>> = [['no idea what psych engine is', 'vine boom sfx']];
+		var swagGoodArray:Array<Array<String>> = [[]];
 		if (Assets.exists(Paths.txt('introText')))
 		{
 			var fullText:String = Assets.getText(Paths.txt('introText'));
@@ -348,8 +348,6 @@ class TitleState extends MusicBeatState
 				ngSpr.visible = false;
 			case 9:
 				createCoolText([curWacky[0]]);
-				if (curWacky[0].contains('Psych'))
-					FlxG.sound.play(Paths.sound('psych'));
 			case 11:
 				addMoreText(curWacky[1]);
 			case 12:

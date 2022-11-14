@@ -246,7 +246,7 @@ class BaseOptions extends MusicBeatState
 				{
 					case Init.SettingTypes.Checkmark:
 						// checkmark
-						var checkmark = ForeverAssets.generateCheckmark(10, option.y, 'checkboxThingie', 'base', 'default', 'UI');
+						var checkmark = ForeverAssets.generateCheckmark(10, option.y, 'checkboxThingie', 'base', Init.trueSettings.get("UI Skin"), 'UI');
 						checkmark.playAnim(Std.string(Init.trueSettings.get(option.text)) + ' finished');
 						tempMap.set(option, checkmark);
 					case Init.SettingTypes.Selector:

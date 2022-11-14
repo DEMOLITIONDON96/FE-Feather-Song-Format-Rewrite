@@ -40,7 +40,6 @@ class OptionsData
 		{name: "Disable Antialiasing", type: "option"},
 		{name: "Disable Flashing Lights", type: "option"},
 		{name: "Disable Screen Shaders", type: "option"},
-		{name: "Opaque User Interface", type: "option"},
 		//
 		{name: "Motion Settings", type: "divider"},
 		//
@@ -57,10 +56,12 @@ class OptionsData
 	/* == Visuals Group == */
 	public static var visuals:Array<GroupData> = [
 		//
-		{name: "Judgement Settings", type: "divider"},
+		{name: "User Interface Settings", type: "divider"},
 		//
+		{name: "UI Skin", type: "option"},
 		{name: "Fixed Judgements", type: "option"},
 		{name: "Simply Judgements", type: "option"},
+		{name: "Opaque User Interface", type: "option"},
 		{name: "Judgement Recycling", type: "option"},
 		//
 		{name: "Text Settings", type: "divider"},
