@@ -14,7 +14,6 @@ typedef GroupData =
 class OptionsData
 {
 	/* == Preferences Group == */
-
 	public static var preferences:Array<GroupData> = [
 		//
 		{name: "Gameplay Settings", type: "divider"},
@@ -34,7 +33,6 @@ class OptionsData
 	];
 
 	/* == Accessibility Group == */
-
 	public static var accessibility:Array<GroupData> = [
 		//
 		{name: "Screen Settings", type: "divider"},
@@ -57,7 +55,6 @@ class OptionsData
 	];
 
 	/* == Visuals Group == */
-
 	public static var visuals:Array<GroupData> = [
 		//
 		{name: "Judgement Settings", type: "divider"},
