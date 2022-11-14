@@ -608,7 +608,10 @@ class PlayState extends MusicBeatState
 			{
 				FlxG.sound.play(openfl.media.Sound.fromFile(dialogueBox.acceptPath + dialogueBox.portraitData.acceptSound + "." + Paths.SOUND_EXT));
 				dialogueBox.curPage += 1;
-				dialogueBox.skipLine();
+				if (dialogueBox.curPage == dialogueBox.dialogueData.dialogue.length)
+					dialogueBox.closeDialog()
+				else
+					dialogueBox.updateDialog();
 			}
 		}
 
@@ -1777,7 +1780,7 @@ class PlayState extends MusicBeatState
 		//
 	}
 
-	private function callDefaultSongEnd()
+	public function callDefaultSongEnd()
 	{
 		if (isStoryMode)
 		{
@@ -1804,133 +1807,50 @@ class PlayState extends MusicBeatState
 		if (skipCutscenes())
 			return onEnd ? endSong() : startCountdown();
 
-		switch (SONG.song.toLowerCase())
-		{
-			case 'eggnog':
-				if (onEnd)
-				{
-					// make the lights go out
-					var blackShit:FlxSprite = new FlxSprite(-FlxG.width * FlxG.camera.zoom,
-						-FlxG.height * FlxG.camera.zoom).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
-					blackShit.scrollFactor.set();
-					add(blackShit);
-					camHUD.visible = false;
+		inCutscene = true;
+		canPause = false;
 
-					// oooo spooky
-					FlxG.sound.play(Paths.sound('events/week5/Lights_Shut_off'));
+		var cutscenePath = Paths.module('cutscene' + (onEnd ? '-end' : ''), 'songs/' + SONG.song.toLowerCase());
+		callFunc(onEnd ? 'songEndCutscene' : 'songCutscene', []);
 
-					// call the song end
-					var eggnogEndTimer:FlxTimer = new FlxTimer().start(Conductor.crochet / 1000, function(timer:FlxTimer)
-					{
-						callDefaultSongEnd();
-					}, 1);
-				}
-
-			case "winter-horrorland":
-				inCutscene = true;
-				canPause = false;
-				var blackScreen:FlxSprite = new FlxSprite(0, 0).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
-				add(blackScreen);
-				blackScreen.scrollFactor.set();
-				camHUD.visible = false;
-
-				new FlxTimer().start(0.1, function(tmr:FlxTimer)
-				{
-					remove(blackScreen);
-					FlxG.sound.play(Paths.sound('events/week5/Lights_Turn_On'));
-					camFollow.y = -2050;
-					camFollow.x += 200;
-					FlxG.camera.focusOn(camFollow.getPosition());
-					FlxG.camera.zoom = 1.5;
-
-					new FlxTimer().start(0.8, function(tmr:FlxTimer)
-					{
-						camHUD.visible = true;
-						remove(blackScreen);
-						FlxTween.tween(FlxG.camera, {zoom: defaultCamZoom}, 2.5, {
-							ease: FlxEase.quadInOut,
-							onComplete: function(twn:FlxTween)
-							{
-								startCountdown();
-							}
-						});
-					});
-				});
-			case 'roses':
-				// the same just play angery noise LOL
-				FlxG.sound.play(Paths.sound('events/week6/ANGRY_TEXT_BOX'));
-				callTextbox();
-			case 'thorns':
-				inCutscene = true;
-				canPause = false;
-				for (hud in allUIs)
-					hud.visible = false;
-
-				var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
-				red.scrollFactor.set();
-
-				var senpaiEvil:FlxSprite = new FlxSprite();
-				senpaiEvil.frames = Paths.getSparrowAtlas('cutscene/senpai/senpaiCrazy');
-				senpaiEvil.animation.addByPrefix('idle', 'Senpai Pre Explosion', 24, false);
-				senpaiEvil.setGraphicSize(Std.int(senpaiEvil.width * 6));
-				senpaiEvil.scrollFactor.set();
-				senpaiEvil.updateHitbox();
-				senpaiEvil.screenCenter();
-
-				add(red);
-				add(senpaiEvil);
-				senpaiEvil.alpha = 0;
-				new FlxTimer().start(0.3, function(swagTimer:FlxTimer)
-				{
-					senpaiEvil.alpha += 0.15;
-					if (senpaiEvil.alpha < 1)
-						swagTimer.reset();
-					else
-					{
-						senpaiEvil.animation.play('idle');
-						FlxG.sound.play(Paths.sound('events/week6/Senpai_Dies'), 1, false, null, true, function()
-						{
-							remove(senpaiEvil);
-							remove(red);
-							FlxG.camera.fade(FlxColor.WHITE, 0.01, true, function()
-							{
-								for (hud in allUIs)
-									hud.visible = true;
-								callTextbox();
-							}, true);
-						});
-						new FlxTimer().start(3.2, function(deadTime:FlxTimer)
-						{
-							FlxG.camera.fade(FlxColor.WHITE, 1.6, false);
-						});
-					}
-				});
-			default:
-				if (onEnd)
-					callDefaultSongEnd();
-				else
-					callTextbox();
-		}
+		// lol dumb check;
+		if (!sys.FileSystem.exists(cutscenePath))
+			callTextbox();
 		//
 	}
 
-	function callTextbox()
+	function checkTextbox():Bool
 	{
-		var dialogPath = Paths.json(SONG.song.toLowerCase() + '/dialogue');
+		var dialogueFileStr:String = 'dialogue';
+		dialogueFileStr = (endingSong ? 'dialogueEnd' : 'dialogue');
+		var dialogPath = Paths.file('songs/' + SONG.song.toLowerCase() + '/$dialogueFileStr.json');
+
 		if (sys.FileSystem.exists(dialogPath))
+			return true;
+
+		return false;
+	}
+
+	public function callTextbox()
+	{
+		if (checkTextbox())
 		{
-			inCutscene = true;
 			if (!endingSong)
 				startedCountdown = false;
 
+			var dialogueFileStr:String = 'dialogue';
+			dialogueFileStr = (endingSong ? 'dialogueEnd' : 'dialogue');
+
+			var dialogPath = Paths.file('songs/' + SONG.song.toLowerCase() + '/$dialogueFileStr.json');
+
 			dialogueBox = DialogueBox.createDialogue(sys.io.File.getContent(dialogPath));
 			dialogueBox.cameras = [dialogueHUD];
-			dialogueBox.whenDaFinish = endingSong ? endSong : startCountdown;
-
 			add(dialogueBox);
+
+			dialogueBox.whenDaFinish = endingSong ? endSong : startCountdown;
 		}
 		else
-			startCountdown();
+			(endingSong ? callDefaultSongEnd() : startCountdown());
 	}
 
 	public static function skipCutscenes():Bool
@@ -1956,7 +1876,7 @@ class PlayState extends MusicBeatState
 
 	var swagCounter:Int = 0;
 
-	private function startCountdown():Void
+	public function startCountdown():Void
 	{
 		inCutscene = false;
 		Conductor.songPosition = -(Conductor.crochet * 5);
@@ -2128,8 +2048,6 @@ class PlayState extends MusicBeatState
 	function callLocalVariables()
 	{
 		// GENERAL
-		setVar('game', PlayState.main);
-
 		setVar('add', add);
 		setVar('remove', remove);
 		setVar('openSubState', openSubState);

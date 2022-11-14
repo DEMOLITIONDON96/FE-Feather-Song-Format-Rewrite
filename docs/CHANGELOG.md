@@ -86,4 +86,11 @@ Used in *both* the [original Funkin' repo](https://github.com/ninjamuffin99/Funk
 --------------------------
 ### 11/11/22
 
-- [WIP] - Rewritten Controls.
+- Rewritten Controls;
+
+--------------------------
+### 12/11/22
+
+- Support for Text Fonts on Dialogue;
+- Chart Editor Tab Fixes;
+- Finished Base Game Cutscenes;

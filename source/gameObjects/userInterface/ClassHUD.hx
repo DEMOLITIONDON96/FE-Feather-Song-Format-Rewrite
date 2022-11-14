@@ -173,7 +173,7 @@ class ClassHUD extends FlxSpriteGroup
 		var isRated = (Timings.comboDisplay != null && Timings.comboDisplay != '' && Timings.notesHit > 0);
 		var rank:String = (Timings.returnScoreRating() != null
 			&& Timings.returnScoreRating() != ''
-			&& Timings.notesHit > 0 ? '[${Timings.returnScoreRating()}]' : '');
+			&& Timings.notesHit > 0 ? ' [${Timings.returnScoreRating()}]' : '');
 
 		// testing purposes
 		var displayAccuracy:Bool = Init.trueSettings.get('Display Accuracy');

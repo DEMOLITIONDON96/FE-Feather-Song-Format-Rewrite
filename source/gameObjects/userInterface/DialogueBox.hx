@@ -12,6 +12,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.system.FlxSound;
 import openfl.media.Sound;
 import gameObjects.gameFonts.Alphabet;
 
@@ -73,6 +74,9 @@ typedef DialogueFileDataDef =
 	var box:Null<String>;
 	var boxStyle:Null<String>;
 	var boxState:Null<String>;
+	var song:Null<String>;
+	var songFadeIn:Null<Int>;
+	var songFadeOut:Null<Int>;
 	var dialogue:Array<DialogueDataDef>;
 }
 
@@ -110,6 +114,8 @@ class DialogueBox extends FlxSpriteGroup
 
 	public var acceptPath:String = Paths.file("sounds/base/menus/");
 
+	public var dialogueSong:FlxSound;
+
 	public static function createDialogue(thisDialogue:String):DialogueBox
 	{
 		//
@@ -137,6 +143,18 @@ class DialogueBox extends FlxSpriteGroup
 		dialogueData = haxe.Json.parse(daDialogue);
 
 		dialogDataCheck();
+
+		var fadeIn = dialogueData.songFadeIn;
+
+		// dialogue song;
+		if (dialogueData.song != null)
+		{
+			dialogueSong = new FlxSound().loadEmbedded(Paths.music(dialogueData.song), false, true);
+			FlxG.sound.list.add(dialogueSong);
+			dialogueSong.fadeIn((fadeIn != null ? fadeIn : 1), 0, 0.8);
+			dialogueSong.persist = true;
+			dialogueSong.looped = true;
+		}
 
 		// background fade
 		bgFade = new FlxSprite(-200, -200).makeGraphic(Std.int(FlxG.width * 1.3), Std.int(FlxG.height * 1.3), FlxColor.BLACK);
@@ -171,6 +189,7 @@ class DialogueBox extends FlxSpriteGroup
 			handSelect.loadGraphic(Paths.image('dialogue/selectors/pixelHand'));
 			handSelect.setGraphicSize(Std.int(handSelect.width * states.PlayState.daPixelZoom * 0.9));
 			handSelect.updateHitbox();
+			handSelect.visible = false;
 		}
 
 		// add stuff
@@ -570,6 +589,11 @@ class DialogueBox extends FlxSpriteGroup
 	public function closeDialog()
 	{
 		whenDaFinish();
+
+		var fadeOut = dialogueData.songFadeOut;
+		if (dialogueSong != null)
+			dialogueSong.fadeOut((fadeOut != null ? fadeOut : 2.2), 0);
+
 		alphabetText.playSounds = false;
 		kill();
 	}
@@ -598,7 +622,9 @@ class DialogueBox extends FlxSpriteGroup
 				box.playAnim('normal');
 		}
 
-		portrait.animation.paused = alphabetText.finishedLine;
+		if (!portraitData.loop)
+			portrait.animation.paused = alphabetText.finishedLine;
+
 		if (portrait.animation.paused)
 			portrait.animation.finish();
 
@@ -607,14 +633,6 @@ class DialogueBox extends FlxSpriteGroup
 			bgFade.alpha = 0.6;
 
 		super.update(elapsed);
-	}
-
-	public function skipLine()
-	{
-		if (curPage == dialogueData.dialogue.length)
-			closeDialog()
-		else
-			updateDialog();
 	}
 
 	override function add(Object:FlxSprite):FlxSprite

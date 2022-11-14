@@ -102,7 +102,6 @@ class MainMenu extends MusicBeatState
 		mainScript.set('this', this);
 		mainScript.set('menuCam', menuCam);
 		mainScript.set('menuHUD', menuHUD);
-		mainScript.set('NewOptions', states.menus.NewOptions);
 
 		super.create();
 

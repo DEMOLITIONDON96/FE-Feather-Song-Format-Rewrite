@@ -163,7 +163,7 @@ class Init extends FlxState
 			NOT_FORCED,
 			''
 		],
-		"Framerate Cap" => [120, Selector, 'Define your maximum FPS.', #if neko FORCED #else NOT_FORCED #end],
+		"Framerate Cap" => [60, Selector, 'Define your maximum FPS.', #if neko FORCED #else NOT_FORCED #end],
 		"Arrow Opacity" => [
 			80,
 			Selector,
@@ -227,24 +227,6 @@ class Init extends FlxState
 
 	public static var trueSettings:Map<String, Dynamic> = [];
 	public static var settingsDescriptions:Map<String, String> = [];
-
-	public static var gameControls:Map<String, Dynamic> = [
-		'LEFT' => [[LEFT, A], 0],
-		'DOWN' => [[DOWN, S], 1],
-		'UP' => [[UP, W], 2],
-		'RIGHT' => [[RIGHT, D], 3],
-		'UI_UP' => [[UP, W], 5],
-		'UI_DOWN' => [[DOWN, S], 6],
-		'UI_LEFT' => [[LEFT, A], 7],
-		'UI_RIGHT' => [[RIGHT, D], 8],
-		'ACCEPT' => [[SPACE, ENTER], 10],
-		'BACK' => [[ESCAPE, BACKSPACE], 11],
-		'PAUSE' => [[ENTER, P], 12],
-		'RESET' => [[R, END], 13],
-		'AUTOPLAY' => [[SIX, NUMPADSIX], 14],
-		'DEBUG' => [[SEVEN, EIGHT], 15],
-		'SKIP' => [[SHIFT, END], 16],
-	];
 
 	public static var filters:Array<BitmapFilter> = []; // the filters the game has active
 	/// initalise filters here
@@ -354,9 +336,6 @@ class Init extends FlxState
 	{
 		FlxG.save.bind('gameControls', "Feather");
 
-		if ((FlxG.save.data.gameControls != null) && (Lambda.count(FlxG.save.data.gameControls) == Lambda.count(gameControls)))
-			gameControls = FlxG.save.data.gameControls;
-
 		if (FlxG.save.data.actionBinds != null)
 			Controls.actions = FlxG.save.data.actionBinds;
 
@@ -376,7 +355,6 @@ class Init extends FlxState
 	public static function saveControls():Void
 	{
 		FlxG.save.bind('gameControls', "Feather");
-		FlxG.save.data.gameControls = gameControls;
 		FlxG.save.data.actionBinds = Controls.actions;
 		FlxG.save.flush();
 	}

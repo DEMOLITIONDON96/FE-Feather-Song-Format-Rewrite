@@ -1,6 +1,7 @@
 {
     "box": "dialogueBox-pixel",
     "boxState": "normal",
+    "boxStyle": "pixel",
     "dialogue": [
         {
             "portrait": "senpai",

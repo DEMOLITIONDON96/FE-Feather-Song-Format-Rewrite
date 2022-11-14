@@ -1,6 +1,12 @@
 {
     "box": "dialogueBox-pixel",
     "boxState": "normal",
+    "boxStyle": "pixel",
+
+    "song": "Lunchbox",
+    "songFadeIn": 1,
+    "songFadeOut": 2.2,
+
     "dialogue": [
         {
             "portrait": "senpai",

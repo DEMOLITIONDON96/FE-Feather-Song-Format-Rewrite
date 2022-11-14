@@ -49,6 +49,28 @@ class Controls
 		"debug" => [Keyboard.NUMBER_7, Keyboard.NUMBER_8],
 	];
 
+	// thing to sort by key ID idk i'm a dummy -gabi
+	public static var actionSort:Map<String, Int> = [
+		// NOTE KEYS
+		"left" => 0,
+		"down" => 1,
+		"up" => 2,
+		"right" => 3,
+		// UI KEYS
+		"ui_left" => 5,
+		"ui_down" => 6,
+		"ui_up" => 7,
+		"ui_right" => 8,
+		"accept" => 10,
+		"pause" => 11,
+		"back" => 12,
+		// MISC GAME KEYS
+		"reset" => 13,
+		"autoplay" => 14,
+		"skip" => 15,
+		"debug" => 16,
+	];
+
 	public static var actions:Map<String, Array<Key>> = [];
 
 	public static var keysHeld:Array<Key> = [];

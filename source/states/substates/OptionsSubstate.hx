@@ -25,13 +25,9 @@ class OptionsSubstate extends MusicBeatSubstate
 	override public function create():Void
 	{
 		// call the options menu
-		var bg = new FlxSprite(-85).loadGraphic(Paths.image('menus/base/menuDesat'));
+		var bg = new FlxSprite().loadGraphic(Paths.image('menus/base/menuDesat'));
 		bg.scrollFactor.set(0, 0.18);
-		bg.setGraphicSize(Std.int(bg.width * 1.1));
-		bg.updateHitbox();
-		bg.screenCenter();
-		bg.color = 0xCE64DF;
-		// bg.color = 0xD8B168;
+		bg.color = 0xD8B168;
 		bg.antialiasing = true;
 		add(bg);
 
@@ -103,23 +99,20 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		keyOptions = new FlxTypedGroup<Alphabet>();
 
-		var arrayTemp:Array<String> = [];
+		var myControls:Array<String> = [];
 		// re-sort everything according to the list numbers
-		for (controlString in Init.gameControls.keys())
-		{
-			arrayTemp[Init.gameControls.get(controlString)[1]] = controlString;
-		}
-		// hiding this on neko platforms, as you can't even use offsets on those -Ghost
-		#if !neko arrayTemp.push("EDIT OFFSET"); #end // append edit offset to the end of the array
+		for (controlString in Controls.actions.keys())
+			myControls[Controls.actionSort.get(controlString)] = controlString;
 
-		for (i in 0...arrayTemp.length)
+		// hiding this on neko platforms, as you can't even use offsets on those -Ghost
+		#if !neko myControls.push("EDIT OFFSET"); #end // append edit offset to the end of the array
+
+		for (i in 0...myControls.length)
 		{
-			if (arrayTemp[i] == null)
-				arrayTemp[i] = '';
 			// generate key options lol
-			var optionsText:Alphabet = new Alphabet(0, 0, arrayTemp[i].replace('_', ' '), true, false);
+			var optionsText:Alphabet = new Alphabet(0, 0, myControls[i].replace('_', ' '), true, false);
 			optionsText.screenCenter();
-			optionsText.y += (90 * (i - (arrayTemp.length / 2)));
+			optionsText.y += (90 * (i - (myControls.length / 2)));
 			optionsText.targetY = i;
 			optionsText.disableX = true;
 			optionsText.isMenuItem = true;
@@ -131,26 +124,26 @@ class OptionsSubstate extends MusicBeatSubstate
 		// stupid shubs you always forget this
 		add(keyOptions);
 
-		generateExtra(arrayTemp);
+		generateExtra(myControls);
 
 		return keyOptions;
 	}
 
-	private function generateExtra(arrayTemp:Array<String>)
+	private function generateExtra(myControls:Array<String>)
 	{
 		otherKeys = new FlxTypedGroup<Alphabet>();
-		for (i in 0...arrayTemp.length)
+		for (i in 0...myControls.length)
 		{
 			for (j in 0...2)
 			{
 				var keyString = "";
 
-				if (Init.gameControls.exists(arrayTemp[i]))
-					keyString = getStringKey(Init.gameControls.get(arrayTemp[i])[0][j]);
+				if (Controls.actions.exists(myControls[i]))
+					keyString = getStringKey(Controls.actions.get(myControls[i])[j]);
 
 				var secondaryText:Alphabet = new Alphabet(0, 0, keyString, false, false);
 				secondaryText.screenCenter();
-				secondaryText.y += (90 * (i - (arrayTemp.length / 2)));
+				secondaryText.y += (90 * (i - (myControls.length / 2)));
 				secondaryText.targetY = i;
 				secondaryText.disableX = true;
 				secondaryText.xTo += ((j + 1) * 420);
@@ -161,6 +154,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 		}
 		add(otherKeys);
+
+		myControls = [];
 	}
 
 	private function getStringKey(arrayThingy:Dynamic):String
@@ -342,7 +337,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				var checkKey = FlxG.keys.getIsDown()[0].ID;
 
 				// now check if its the key we want to change
-				Init.gameControls.get(keyOptions.members[curSelection].text.replace(' ', '_'))[0][curHorizontalSelection] = checkKey;
+				Controls.actions.get(keyOptions.members[curSelection].text.replace(' ', '_'))[curHorizontalSelection] = checkKey;
 				otherKeys.members[(curSelection * 2) + curHorizontalSelection].text = getStringKey(checkKey);
 
 				var keyText:String = keyOptions.members[curSelection].text.toLowerCase();
