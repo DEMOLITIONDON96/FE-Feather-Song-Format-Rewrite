@@ -1,9 +1,11 @@
 package states;
 
-import dependency.FNFUIState;
+import dependency.FNFUtils.FNFTransition;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSubState;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.ui.FlxUIState;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import song.Conductor;
@@ -15,26 +17,38 @@ import song.Conductor;
 	I'm not going to change any of this because I don't truly understand how songplaying works, 
 	I mostly just wanted to rewrite the actual gameplay side of things.
  */
-class MusicBeatState extends FNFUIState
+class MusicBeatState extends FlxUIState
 {
-	// original variables extended from original game source
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
+	public var lastStep:Int = 0;
+	public var lastBeat:Int = 0;
+	public var lastSection:Int = 0;
 
 	public var curStep:Int = 0;
 	public var curBeat:Int = 0;
+	public var curSection:Int = 0;
+
+	// fixes a bug with FlxUITabMenu where it wouldn't respect the current camera zoom
+	public var camBeat:FlxCamera;
 
 	// class create event
 	override function create()
 	{
 		// dump
-		Paths.clearStoredMemory();
-		if ((!Std.isOfType(this, states.PlayState)) && (!Std.isOfType(this, states.charting.OriginalChartingState)))
+		var clearPlayState = (PlayState.clearStored && !Std.isOfType(this, states.PlayState));
+		if ((clearPlayState))
+			Paths.clearStoredMemory();
+
+		if ((!Std.isOfType(this, states.editors.OriginalChartingState)))
 			Paths.clearUnusedMemory();
 
 		// create controls event;
 		Controls.keyEventPress.add(keyEventPress);
 		Controls.keyEventRelease.add(keyEventRelease);
+
+		camBeat = FlxG.camera;
+
+		if (!FlxTransitionableState.skipNextTransOut)
+			openSubState(new FNFTransition(0.5, true));
 
 		super.create();
 
@@ -42,6 +56,7 @@ class MusicBeatState extends FNFUIState
 		FlxG.watch.add(Conductor, "songPosition");
 		FlxG.watch.add(this, "curBeat");
 		FlxG.watch.add(this, "curStep");
+		FlxG.watch.add(this, "curSection");
 	}
 
 	override function destroy()
@@ -68,7 +83,9 @@ class MusicBeatState extends FNFUIState
 	public function updateContents()
 	{
 		updateCurStep();
-		updateBeat();
+
+		curBeat = Math.floor(curStep / 4);
+		curSection = Math.floor(curStep / 16);
 
 		// delta time bullshit
 		var trueStep:Int = curStep;
@@ -98,11 +115,6 @@ class MusicBeatState extends FNFUIState
 	var storedSteps:Array<Int> = [];
 	var skippedSteps:Array<Int> = [];
 
-	public function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-	}
-
 	public function updateCurStep():Void
 	{
 		var lastChange:BPMChangeEvent = {
@@ -126,17 +138,36 @@ class MusicBeatState extends FNFUIState
 
 		if (!storedSteps.contains(curStep))
 			storedSteps.push(curStep);
+
+		if (lastStep >= curStep)
+			return;
+
+		if (curStep != lastStep)
+			lastStep = curStep;
 	}
 
 	public function beatHit():Void
 	{
-		// used for updates when beats are hit in classes that extend this one
+		if (lastBeat >= curBeat)
+			return;
+
+		if (curBeat != lastBeat)
+			lastBeat = curBeat;
+	}
+
+	public function sectionHit():Void
+	{
+		if (lastSection >= curSection)
+			return;
+
+		if (curSection != lastSection)
+			lastSection = curSection;
 	}
 
 	var textField:FlxText;
 	var fieldTween:FlxTween;
 
-	public function logTrace(input:String, duration:Float, traceOnConsole:Bool = true, ?cam:FlxCamera)
+	public function logTrace(input:String, duration:Float, traceOnConsole:Bool = true)
 	{
 		if (traceOnConsole)
 			trace(input);
@@ -166,8 +197,7 @@ class MusicBeatState extends FNFUIState
 			textField.setBorderStyle(OUTLINE, 0xFF000000, 2);
 			textField.alpha = 0;
 			textField.screenCenter(X);
-			if (cam != null)
-				textField.cameras = [cam];
+			textField.scrollFactor.set();
 			add(textField);
 
 			fieldTween = FlxTween.tween(textField, {alpha: 1}, 0.2, {
@@ -192,16 +222,13 @@ class MusicBeatState extends FNFUIState
 
 class MusicBeatSubstate extends FlxSubState
 {
-	public function new()
-	{
-		super();
-	}
-
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
+	private var lastStep:Int = 0;
+	private var lastBeat:Int = 0;
+	private var lastSection:Int = 0;
 
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
+	private var curSection:Int = 0;
 
 	override function create()
 	{
@@ -227,11 +254,11 @@ class MusicBeatSubstate extends FlxSubState
 
 	override function update(elapsed:Float)
 	{
-		// everyStep();
 		var oldStep:Int = curStep;
 
 		updateCurStep();
 		curBeat = Math.floor(curStep / 4);
+		curSection = Math.floor(curStep / 16);
 
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
@@ -259,10 +286,29 @@ class MusicBeatSubstate extends FlxSubState
 	{
 		if (curStep % 4 == 0)
 			beatHit();
+
+		if (lastStep >= curStep)
+			return;
+
+		if (curStep != lastStep)
+			lastStep = curStep;
 	}
 
 	public function beatHit():Void
 	{
-		// do literally nothing dumbass
+		if (lastBeat >= curBeat)
+			return;
+
+		if (curBeat != lastBeat)
+			lastBeat = curBeat;
+	}
+
+	public function sectionHit():Void
+	{
+		if (lastSection >= curSection)
+			return;
+
+		if (curSection != lastSection)
+			lastSection = curSection;
 	}
 }

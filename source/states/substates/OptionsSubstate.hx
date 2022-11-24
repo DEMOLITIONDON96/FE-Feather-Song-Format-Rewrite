@@ -6,18 +6,19 @@ import flixel.FlxSprite;
 import flixel.effects.FlxFlicker;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
+import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import gameObjects.gameFonts.Alphabet;
+import objects.fonts.Alphabet;
 import states.MusicBeatState.MusicBeatSubstate;
-
-using StringTools;
 
 class OptionsSubstate extends MusicBeatSubstate
 {
 	private var curSelection = 0;
+
 	private var submenuGroup:FlxTypedGroup<FlxBasic>;
 	private var submenuoffsetGroup:FlxTypedGroup<FlxBasic>;
+	private var submenuResetGroup:FlxTypedGroup<FlxBasic>;
 
 	private var offsetTemp:Float;
 
@@ -38,6 +39,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		submenuGroup = new FlxTypedGroup<FlxBasic>();
 		submenuoffsetGroup = new FlxTypedGroup<FlxBasic>();
+		submenuResetGroup = new FlxTypedGroup<FlxBasic>();
 
 		submenu = new FlxSprite(0, 0).makeGraphic(FlxG.width - 200, FlxG.height - 200, FlxColor.fromRGB(250, 253, 109));
 		submenu.screenCenter();
@@ -55,14 +57,14 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		// submenuoffset group
 		// this code by codist
-		var submenuOffsetText = new Alphabet(0, 0, "Left or Right to edit.", true, false);
+		var submenuOffsetText = new Alphabet(0, 0, "Left or Right to edit", true, false);
 		submenuOffsetText.screenCenter();
 		submenuOffsetText.y -= 144;
 		submenuoffsetGroup.add(submenuOffsetText);
 
 		var submenuOffsetText2 = new Alphabet(0, 0, "Negative is Late", true, false);
 		submenuOffsetText2.screenCenter();
-		submenuOffsetText2.y -= 80;
+		submenuOffsetText2.y -= 100;
 		submenuoffsetGroup.add(submenuOffsetText2);
 
 		var submenuOffsetText3 = new Alphabet(0, 0, "Escape to Cancel", true, false);
@@ -72,7 +74,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		var submenuOffsetText4 = new Alphabet(0, 0, "Enter to Save", true, false);
 		submenuOffsetText4.screenCenter();
-		submenuOffsetText4.y += 164;
+		submenuOffsetText4.y += 204;
 		submenuoffsetGroup.add(submenuOffsetText4);
 
 		var submenuOffsetValue:FlxText = new FlxText(0, 0, 0, "< 0ms >", 50, false);
@@ -84,12 +86,35 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		// alright back to my code :ebic:
 
+		// submenu reset texts;
+		var submenuResetText = new Alphabet(0, 0, "This cannot be undone", true, false);
+		submenuResetText.screenCenter();
+		submenuResetText.y -= 144;
+		submenuResetGroup.add(submenuResetText);
+
+		var submenuResetText2 = new Alphabet(0, 0, "Are you sure", true, false);
+		submenuResetText2.screenCenter();
+		submenuResetText2.y -= 50;
+		submenuResetGroup.add(submenuResetText2);
+
+		var submenuResetText3 = new Alphabet(0, 0, "Escape to Cancel", true, false);
+		submenuResetText3.screenCenter();
+		submenuResetText3.y += 102;
+		submenuResetGroup.add(submenuResetText3);
+
+		var submenuResetText4 = new Alphabet(0, 0, "Enter to Proceed", true, false);
+		submenuResetText4.screenCenter();
+		submenuResetText4.y += 164;
+		submenuResetGroup.add(submenuResetText4);
+
 		add(submenu);
 		add(submenuGroup);
 		add(submenuoffsetGroup);
+		add(submenuResetGroup);
 		submenu.visible = false;
 		submenuGroup.visible = false;
 		submenuoffsetGroup.visible = false;
+		submenuResetGroup.visible = false;
 	}
 
 	private var keyOptions:FlxTypedGroup<Alphabet>;
@@ -104,8 +129,10 @@ class OptionsSubstate extends MusicBeatSubstate
 		for (controlString in Controls.actions.keys())
 			myControls[Controls.actionSort.get(controlString)] = controlString;
 
-		// hiding this on neko platforms, as you can't even use offsets on those -Ghost
+		//
+		myControls.push('');
 		#if !neko myControls.push("EDIT OFFSET"); #end // append edit offset to the end of the array
+		// myControls.push('RESET KEYBINDS');
 
 		for (i in 0...myControls.length)
 		{
@@ -139,7 +166,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				var keyString = "";
 
 				if (Controls.actions.exists(myControls[i]))
-					keyString = getStringKey(Controls.actions.get(myControls[i])[j]);
+					keyString = Controls.returnStringKey(Controls.actions.get(myControls[i])[j]);
 
 				var secondaryText:Alphabet = new Alphabet(0, 0, keyString, false, false);
 				secondaryText.screenCenter();
@@ -158,31 +185,14 @@ class OptionsSubstate extends MusicBeatSubstate
 		myControls = [];
 	}
 
-	private function getStringKey(arrayThingy:Dynamic):String
-	{
-		var keyString:String = 'none';
-		if (arrayThingy != null)
-		{
-			var keyDisplay:FlxKey = arrayThingy;
-			keyString = keyDisplay.toString();
-		}
-
-		keyString = keyString.replace(" ", "");
-
-		return keyString;
-	}
-
 	private function updateSelection(equal:Int = 0)
 	{
 		if (equal != curSelection)
 			FlxG.sound.play(Paths.sound('base/menus/scrollMenu'));
 		var prevSelection:Int = curSelection;
-		curSelection = equal;
+
 		// wrap the current selection
-		if (curSelection < 0)
-			curSelection = keyOptions.length - 1;
-		else if (curSelection >= keyOptions.length)
-			curSelection = 0;
+		curSelection = FlxMath.wrap(equal, 0, keyOptions.length - 1);
 
 		//
 		for (i in 0...keyOptions.length)
@@ -307,72 +317,87 @@ class OptionsSubstate extends MusicBeatSubstate
 		offsetTemp = Init.trueSettings['Offset'];
 
 		submenu.visible = true;
-		if (curSelection != keyOptions.length - 1)
-			submenuGroup.visible = true;
-		else
-			submenuoffsetGroup.visible = true;
+		switch (keyOptions.members[curSelection].text)
+		{
+			case "RESET KEYBINDS":
+				submenuResetGroup.visible = true;
+			case "EDIT OFFSET":
+				submenuoffsetGroup.visible = true;
+			default:
+				submenuGroup.visible = true;
+		}
 	}
 
 	private function closeSubmenu()
 	{
 		submenuOpen = false;
-
 		submenu.visible = false;
 
 		submenuGroup.visible = false;
 		submenuoffsetGroup.visible = false;
+		submenuResetGroup.visible = false;
 	}
 
 	private function subMenuControl()
 	{
 		// I dont really like hardcoded shit so I'm probably gonna change this lmao
-		if (curSelection != keyOptions.length - 1)
+		switch (keyOptions.members[curSelection].text)
 		{
-			// be able to close the submenu
-			if (FlxG.keys.justPressed.F10)
-				closeSubmenu();
-			else if (FlxG.keys.justPressed.ANY)
-			{
-				// loop through existing keys and see if there are any alike
-				var checkKey = FlxG.keys.getIsDown()[0].ID;
+			case "RESET KEYBINDS":
+				if (FlxG.keys.justPressed.ENTER)
+				{
+					Controls.actions = Controls.defaultActions;
+					FlxG.save.data.actionBinds == null;
+					closeSubmenu();
+				}
+				else if (FlxG.keys.justPressed.ESCAPE)
+					closeSubmenu();
 
-				// now check if its the key we want to change
-				Controls.actions.get(keyOptions.members[curSelection].text.replace(' ', '_'))[curHorizontalSelection] = checkKey;
-				otherKeys.members[(curSelection * 2) + curHorizontalSelection].text = getStringKey(checkKey);
+			case "EDIT OFFSET":
+				if (FlxG.keys.justPressed.ENTER)
+				{
+					Init.trueSettings['Offset'] = offsetTemp;
+					closeSubmenu();
+				}
+				else if (FlxG.keys.justPressed.ESCAPE)
+					closeSubmenu();
 
-				var keyText:String = keyOptions.members[curSelection].text.toLowerCase();
+				var move = 0;
+				if (FlxG.keys.pressed.LEFT)
+					move = -1;
+				else if (FlxG.keys.pressed.RIGHT)
+					move = 1;
 
-				// set the new key for the selected action;
-				Controls.setActionKey(keyText, curHorizontalSelection, checkKey);
+				offsetTemp += move * 0.1;
 
-				// close the submenu
-				closeSubmenu();
-			}
-			//
-		}
-		else
-		{
-			if (FlxG.keys.justPressed.ENTER)
-			{
-				Init.trueSettings['Offset'] = offsetTemp;
-				closeSubmenu();
-			}
-			else if (FlxG.keys.justPressed.ESCAPE)
-				closeSubmenu();
+				submenuoffsetGroup.forEachOfType(FlxText, str ->
+				{
+					str.text = "< " + Std.string(Math.floor(offsetTemp * 10) / 10) + " >";
+					str.screenCenter(X);
+				});
 
-			var move = 0;
-			if (FlxG.keys.pressed.LEFT)
-				move = -1;
-			else if (FlxG.keys.pressed.RIGHT)
-				move = 1;
+			default:
+				// be able to close the submenu
+				if (FlxG.keys.justPressed.F10)
+					closeSubmenu();
+				else if (FlxG.keys.justPressed.ANY)
+				{
+					// loop through existing keys and see if there are any alike
+					var checkKey = FlxG.keys.getIsDown()[0].ID;
 
-			offsetTemp += move * 0.1;
+					// now check if its the key we want to change
+					Controls.actions.get(keyOptions.members[curSelection].text.replace(' ', '_'))[curHorizontalSelection] = checkKey;
+					otherKeys.members[(curSelection * 2) + curHorizontalSelection].text = Controls.returnStringKey(checkKey);
 
-			submenuoffsetGroup.forEachOfType(FlxText, str ->
-			{
-				str.text = "< " + Std.string(Math.floor(offsetTemp * 10) / 10) + " >";
-				str.screenCenter(X);
-			});
+					var keyText:String = keyOptions.members[curSelection].text.toLowerCase();
+
+					// set the new key for the selected action;
+					Controls.setActionKey(keyText, curHorizontalSelection, checkKey);
+
+					// close the submenu
+					closeSubmenu();
+				}
+				//
 		}
 	}
 }

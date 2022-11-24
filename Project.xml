@@ -3,7 +3,14 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Forever Engine Feather" file="Forever Engine Feather" packageName="com.beastlyghost.foreverenginefeather" package="com.beastlyghost.foreverenginefeather" main="Main" version="0.1" company="BeastlyGhost" />
+	<!-- Application Window Title and Executable File Name -->
+	<app title="Forever Engine Feather" file="FE-Feather" />
+
+	<!-- Package Name (Android, Mac) -->
+	<app packageName="com.beastlyghost.foreverenginefeather" package="com.beastlyghost.foreverenginefeather" />
+
+	<!-- Main Class State, Game Version, Company (save data) Name -->
+	<app main="Main" version="0.1" company="BeastlyGhost" />
 
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
@@ -44,7 +51,7 @@
 	<source path="source" />
 	<assets path="assets" />
 
-	<assets path="FE-CrashDialog.exe" type="template" if="windows release" />
+	<assets path="FEF-CrashDialog.exe" type="template" if="windows release" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
@@ -81,6 +88,8 @@
 	<!-- Always enable Null Object Reference check for crash dialog -->
 	<haxedef name="HXCPP_CHECK_POINTER" if="release" />
 	<haxedef name="HXCPP_STACK_LINE" if="release" />
+
+	<haxedef name="no-deprecation-warnings" />
 
 	<!--Android Internet Connection-->
 	<config:android permission="android.permission.ACCESS_NETWORK_STATE" />

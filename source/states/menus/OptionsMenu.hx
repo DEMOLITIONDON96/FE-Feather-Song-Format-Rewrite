@@ -4,8 +4,9 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
-import gameObjects.gameFonts.Alphabet;
+import objects.fonts.Alphabet;
 import states.data.BaseOptions;
+import states.data.OptionsData;
 
 class OptionsMenu extends BaseOptions
 {
@@ -32,7 +33,7 @@ class OptionsMenu extends BaseOptions
 		// add above everything;
 		insert(members.indexOf(aboveGroup), infoText);
 
-		updateSelections();
+		updateSelections(curSelected);
 	}
 
 	override public function update(elapsed:Float)
@@ -46,7 +47,7 @@ class OptionsMenu extends BaseOptions
 		var down_p = Controls.getPressEvent("ui_down");
 		var controlArray:Array<Bool> = [up, down, up_p, down_p];
 
-		if ((controlArray.contains(true)) && (!lockedMovement))
+		if ((controlArray.contains(true)))
 		{
 			for (i in 0...controlArray.length)
 			{
@@ -58,9 +59,9 @@ class OptionsMenu extends BaseOptions
 					{
 						// up == 2 - down == 3
 						if (i == 2)
-							updateSelections(-1);
+							updateSelections(curSelected - 1);
 						else if (i == 3)
-							updateSelections(1);
+							updateSelections(curSelected + 1);
 
 						FlxG.sound.play(Paths.sound('base/menus/scrollMenu'));
 					}
@@ -78,13 +79,13 @@ class OptionsMenu extends BaseOptions
 				//
 				FlxG.sound.play(Paths.sound('base/menus/scrollMenu'));
 				openSubState(new states.substates.OptionsSubstate());
-				updateSelections();
+				updateSelections(curSelected);
 			}
 			else if (activeGroup[curSelected].type == "subgroup")
 			{
 				FlxG.sound.play(Paths.sound('base/menus/scrollMenu'));
 				switchCategory(optionText.toLowerCase());
-				updateSelections();
+				updateSelections(curSelected);
 			}
 		}
 
@@ -106,7 +107,7 @@ class OptionsMenu extends BaseOptions
 			if (curCategory != 'main')
 			{
 				switchCategory('main');
-				updateSelections();
+				updateSelections(curSelected);
 			}
 			else
 			{
@@ -118,7 +119,7 @@ class OptionsMenu extends BaseOptions
 		}
 	}
 
-	override public function updateSelections(newSelection:Int = 0)
+	override public function updateSelections(newSelection:Int)
 	{
 		super.updateSelections(newSelection);
 

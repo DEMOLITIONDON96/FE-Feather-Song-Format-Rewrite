@@ -1,15 +1,12 @@
 import base.Overlay;
+import base.ScoreUtils;
 import flixel.FlxG;
 import flixel.FlxState;
-import flixel.input.keyboard.FlxKey;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ColorMatrixFilter;
-import playerData.*;
-
-using StringTools;
 
 /** 
-	Enumerator for settingtypes
+ * Enumerator for settingtypes
 **/
 enum SettingTypes
 {
@@ -17,10 +14,16 @@ enum SettingTypes
 	Selector;
 }
 
+enum SettingState
+{
+	FORCED; // forced at the default value, doesn't show up on the settings menu;
+	NOT_FORCED;
+}
+
 /**
-	This is the initialisation class. if you ever want to set anything before the game starts or call anything then this is probably your best bet.
-	A lot of this code is just going to be similar to the flixel templates' colorblind filters because I wanted to add support for those as I'll
-	most likely need them for skater, and I think it'd be neat if more mods were more accessible.
+ * This is the initialisation class. if you ever want to set anything before the game starts or call anything then this is probably your best bet.
+ * A lot of this code is just going to be similar to the flixel templates' colorblind filters because I wanted to add support for those as I'll
+ * most likely need them for skater, and I think it'd be neat if more mods were more accessible.
 **/
 class Init extends FlxState
 {
@@ -34,9 +37,6 @@ class Init extends FlxState
 		3 - offsets, this is unused but it'd bug me if it were set to 0
 		might redo offset code since I didnt make it and it bugs me that it's hardcoded the the last part of the controls menu
 	 */
-	public static var FORCED = 'forced';
-	public static var NOT_FORCED = 'not forced';
-
 	public static var gameSettings:Map<String, Dynamic> = [
 		'Downscroll' => [
 			false,
@@ -81,20 +81,12 @@ class Init extends FlxState
 			'Darkens non-UI elements, useful if you find the characters and backgrounds distracting.',
 			NOT_FORCED
 		],
-		'Opacity Type' => [
-			'UI',
-			Selector,
-			'Choose whether the filter will be behind the notes or the UI.',
-			NOT_FORCED,
-			['UI', 'Notes']
-		],
 		'Colored Health Bar' => [
-			false,
+			true,
 			Checkmark,
 			'Whether the Health Bar should be colored after the Icons.',
 			NOT_FORCED,
 		],
-		'Opaque User Interface' => [false, Checkmark, 'Makes the UI (Healthbar, Icons, etc.) opaque.', NOT_FORCED],
 		'Counter' => [
 			'None',
 			Selector,
@@ -125,12 +117,6 @@ class Init extends FlxState
 			false,
 			Checkmark,
 			'When enabled, left and right notes no longer move the camera.',
-			NOT_FORCED
-		],
-		'Disable Note Splashes' => [
-			false,
-			Checkmark,
-			'Whether to disable note splashes during Gameplay, useful if you find them distracting.',
 			NOT_FORCED
 		],
 		// custom ones lol
@@ -176,6 +162,12 @@ class Init extends FlxState
 			"Sets the opacity for the Hold Notes... Huh, why isnt the trail cut off?",
 			NOT_FORCED
 		],
+		"Splash Opacity" => [
+			60,
+			Selector,
+			"Sets the opacity for the Note Splashes, shown when hitting \"Sick!\" judgements on notes.",
+			NOT_FORCED
+		],
 		'Accuracy Hightlight' => [
 			true,
 			Checkmark,
@@ -189,15 +181,6 @@ class Init extends FlxState
 			NOT_FORCED
 		],
 		'Centered Notefield' => [false, Checkmark, "Center the notes, disables the enemy's notes."],
-		/*
-			"Vanilla Menus" => [
-				false,
-				Checkmark,
-				"Whether to use the old Base Game menus instead of the Custom-made ones",
-				FORCED
-			],
-			// doing later
-		 */
 		'Skip Text' => [
 			'freeplay only',
 			Selector,
@@ -221,6 +204,32 @@ class Init extends FlxState
 			true,
 			Checkmark,
 			"Recycles judgements and combo rather than adding one every note hit, may cause layering issues.",
+			NOT_FORCED
+		],
+		"Camera Position" => [
+			'none',
+			Selector,
+			"Chooses where the camera should stay; None = move depending on sections.",
+			NOT_FORCED,
+			['none', 'bf', 'gf', 'dad', 'center']
+		],
+		"Timing Preset" => [
+			'forever',
+			Selector,
+			"Chooses what preset should be used for Judgement Timing Windows.",
+			NOT_FORCED,
+			['forever', 'funkin', 'judge four', 'itg']
+		],
+		"Display Miss Judgement" => [
+			true,
+			Checkmark,
+			"Whether to display a miss judgement when missing notes.",
+			NOT_FORCED
+		],
+		"Display Timings" => [
+			false,
+			Checkmark,
+			"Whether to display how early/late you hit a judgement on a note.",
 			NOT_FORCED
 		],
 	];
@@ -267,7 +276,7 @@ class Init extends FlxState
 		FlxG.save.bind('gameSettings', "Feather");
 
 		// load controls and highscore
-		Highscore.load();
+		ScoreUtils.loadScores();
 		loadControls();
 
 		loadSettings();
@@ -284,7 +293,7 @@ class Init extends FlxState
 		FlxG.mouse.useSystemCursor = true; // Use system cursor because it's prettier
 		FlxG.mouse.visible = false; // Hide mouse on start
 
-		Main.switchState(this, cast Type.createInstance(Main.mainClassState, []));
+		Main.switchState(this, cast Type.createInstance(Main.game.mainState, []));
 	}
 
 	public static function loadSettings():Void
@@ -313,6 +322,7 @@ class Init extends FlxState
 		setDefaultValue("Stage Opacity", 0, 100, 100);
 		setDefaultValue("Arrow Opacity", 0, 1, 80);
 		setDefaultValue("Hold Opacity", 0, 1, 60);
+		setDefaultValue("Splash Opacity", 0, 1, 60);
 
 		reloadUISkins();
 
@@ -366,6 +376,13 @@ class Init extends FlxState
 		Overlay.updateDisplayInfo(trueSettings.get('FPS Counter'), trueSettings.get('Debug Info'), trueSettings.get('Memory Counter'));
 
 		Main.updateFramerate(trueSettings.get("Framerate Cap"));
+
+		if (Controls.actions.exists("volUp"))
+			FlxG.sound.volumeUpKeys = Controls.actions.get("volUp");
+		if (Controls.actions.exists("volDown"))
+			FlxG.sound.volumeDownKeys = Controls.actions.get("volDown");
+		if (Controls.actions.exists("volMute"))
+			FlxG.sound.muteKeys = Controls.actions.get("volMute");
 
 		///*
 		filters = [];

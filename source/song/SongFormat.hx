@@ -9,7 +9,7 @@ typedef SwagSong =
 {
 	var song:String;
 	var notes:Array<SwagSection>;
-	var events:Array<Array<Dynamic>>;
+	var events:Array<Dynamic>;
 	var bpm:Float;
 	var needsVoices:Bool;
 	var speed:Float;
@@ -22,7 +22,7 @@ typedef SwagSong =
 	var assetModifier:String;
 	var validScore:Bool;
 
-	@:optional public dynamic function copy():SwagSong;
+	@:optional dynamic function copy():SwagSong;
 }
 
 /*
@@ -41,14 +41,13 @@ typedef SwagSection =
 }
 
 /*
-	Timed Event Format;
+	Timed Event Format for Forever Engine Feather;
  */
 typedef TimedEvent =
 {
-	public var strumTime:Float;
-	public var event:String;
-	public var val1:String;
-	public var val2:String;
-	public var val3:String;
-	@:optional public var color:Array<Int>;
+	var name:String;
+	var step:Float;
+	var values:Array<String>;
+	// var color:Array<Int>;
+	// var stack:Array<TimedEvent>;
 }

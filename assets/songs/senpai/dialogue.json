@@ -11,14 +11,17 @@
         {
             "portrait": "senpai",
             "expression": "normal",
-            "text": "Ah, a new fair maiden has come \nin search of true love!"
+            "text": "Ah, a new fair maiden has come \nin search of true love!",
+            "speed": 1.2
         },
         {
-            "text": "A serenade between gentlemen \nshall decide where her beautiful \nheart shall reside."
+            "text": "A serenade between gentlemen \nshall decide where her beautiful \nheart shall reside.",
+            "speed": 1.2
         },
         {
             "portrait": "bf-pixel",
-            "text": "Beep bo bop"
+            "text": "Beep bo bop",
+            "speed": 1.5
         }
     ]
 }

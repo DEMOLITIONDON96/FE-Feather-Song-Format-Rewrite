@@ -99,7 +99,7 @@ function updateStage(curBeat:Int, boyfriend:Character, gf:Character, dad:Charact
 	if (!trainMoving)
 		trainCooldown += 1;
 
-	if (curBeat % 8 == 4 && FlxG.random.bool(30) && !trainMoving && trainCooldown > 8)
+	if (curBeat % 8 == 4 && FlxG.random.bool(30) && !trainMoving && trainCooldown > 8 && !trainSound.playing)
 	{
 		trainCooldown = FlxG.random.int(-4, 0);
 		trainStart();

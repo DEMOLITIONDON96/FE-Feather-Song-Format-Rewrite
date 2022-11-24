@@ -8,6 +8,11 @@
 Forever Engine Feather is currently in a Work in Progress stage, maintained by the main developers and contributors.
 
 ----------------------------------------------
+**FOREVER ENGINE FEATHER REQUIRES THE LATEST FLIXEL LIBRARIES TO BE INSTALLED**.
+
+**I AM NOT RESPONSIBLE FOR CRASHES / ISSUES WITH OLDER VERSIONS OF FLIXEL, NOR I AM RESPONSIBLE FOR MAINTAINING SAID VERSIONS**.
+
+----------------------------------------------
 # Features:
 * All of [Forever Engine Legacy](https://github.com/Yoshubs/Forever-Engine-Legacy)'s Features;
 * A Scripting System based on HScript, [SScript](https://github.com/AltronMaxX/SScript);
@@ -19,6 +24,7 @@ Forever Engine Feather is currently in a Work in Progress stage, maintained by t
 ### To see changes made to the engine, check out the CHANGELOG [here](/docs/CHANGELOG.md).
 
 ### If you want to push out improvements to Feather faster, take a look at the TODO list [here](/TODO).
-We appreciate any and all help with these features.
+
+### For documentation like a guide for compiling, script variables and more, visit our repository's [Wiki](https://github.com/BeastlyGhost/Forever-Engine-Feather/wiki).
 
 ----------------------------------------------

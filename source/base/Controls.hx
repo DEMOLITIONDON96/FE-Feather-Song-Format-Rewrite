@@ -1,8 +1,9 @@
 package base;
 
 import flixel.FlxG;
-import openfl.events.KeyboardEvent;
+import flixel.input.keyboard.FlxKey;
 import lime.app.Event;
+import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 
 enum KeyState
@@ -30,10 +31,10 @@ class Controls
 
 	public static var defaultActions:Map<String, Array<Key>> = [
 		// NOTE KEYS
-		"left" => [Keyboard.LEFT, Keyboard.D],
-		"down" => [Keyboard.DOWN, Keyboard.F],
-		"up" => [Keyboard.UP, Keyboard.J],
-		"right" => [Keyboard.RIGHT, Keyboard.K],
+		"left" => [Keyboard.LEFT, Keyboard.A],
+		"down" => [Keyboard.DOWN, Keyboard.S],
+		"up" => [Keyboard.UP, Keyboard.W],
+		"right" => [Keyboard.RIGHT, Keyboard.D],
 		// UI KEYS
 		"ui_left" => [Keyboard.LEFT, Keyboard.A],
 		"ui_down" => [Keyboard.DOWN, Keyboard.S],
@@ -46,10 +47,14 @@ class Controls
 		"reset" => [Keyboard.R, Keyboard.END],
 		"autoplay" => [Keyboard.NUMBER_6],
 		"skip" => [Keyboard.SHIFT, Keyboard.END],
-		"debug" => [Keyboard.NUMBER_7, Keyboard.NUMBER_8],
+		//
+		"volUp" => [Keyboard.EQUAL, Keyboard.NUMPAD_ADD],
+		"volDown" => [Keyboard.MINUS, Keyboard.NUMPAD_MULTIPLY],
+		"volMute" => [Keyboard.NUMBER_0, Keyboard.NUMPAD_0],
 	];
 
-	// thing to sort by key ID idk i'm a dummy -gabi
+	// thing to sort by key ID idk i'm a dummy @BeastlyGhost
+	// I was gonna try & optimize it via inlining but nvm it's not done yet -memehoovy
 	public static var actionSort:Map<String, Int> = [
 		// NOTE KEYS
 		"left" => 0,
@@ -65,10 +70,13 @@ class Controls
 		"pause" => 11,
 		"back" => 12,
 		// MISC GAME KEYS
-		"reset" => 13,
-		"autoplay" => 14,
-		"skip" => 15,
-		"debug" => 16,
+		"reset" => 14,
+		"autoplay" => 15,
+		"skip" => 16,
+		//
+		"volUp" => 18,
+		"volDown" => 19,
+		"volMute" => 20,
 	];
 
 	public static var actions:Map<String, Array<Key>> = [];
@@ -80,8 +88,7 @@ class Controls
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 
-		if (FlxG.save.data.actionBinds == null)
-			actions = defaultActions;
+		actions = defaultActions;
 	}
 
 	public static function destroy()
@@ -132,7 +139,7 @@ class Controls
 		}
 	}
 
-	private static function catchKeys(key:Key):Array<String>
+	inline private static function catchKeys(key:Key):Array<String>
 	{
 		//
 		if (key == null)
@@ -148,18 +155,33 @@ class Controls
 		return gottenKeys;
 	}
 
-	public static function getKeyState(key:Key):KeyState
+	inline public static function getKeyState(key:Key):KeyState
 	{
 		//
 		return keysHeld.contains(key) ? PRESSED : RELEASED;
 	}
 
-	public static function getKeyString(action:String)
+	public static function getKeyString(action:String, id:Int)
 	{
-		//
-		if (actions.exists(action))
-			return action;
-		return '';
+		var keyString = "";
+
+		if (Controls.actions.exists(action))
+			keyString = returnStringKey(Controls.actions.get(action)[id]);
+		return keyString;
+	}
+
+	public static function returnStringKey(arrayThingy:Dynamic):String
+	{
+		var keyString:String = 'none';
+		if (arrayThingy != null)
+		{
+			var keyDisplay:FlxKey = arrayThingy;
+			keyString = keyDisplay.toString();
+		}
+
+		keyString = keyString.replace(" ", "");
+
+		return keyString;
 	}
 
 	public static function getPressEvent(action:String, type:String = 'justPressed'):Bool
@@ -182,7 +204,7 @@ class Controls
 		return false;
 	}
 
-	public static function addActionKey(action:String, keys:Array<Key>)
+	inline public static function addActionKey(action:String, keys:Array<Key>)
 	{
 		//
 		if (actions.exists(action))
@@ -192,7 +214,7 @@ class Controls
 		}
 	}
 
-	public static function setActionKey(action:String, id:Int, key:Key)
+	inline public static function setActionKey(action:String, id:Int, key:Key)
 	{
 		//
 		if (actions.exists(action))

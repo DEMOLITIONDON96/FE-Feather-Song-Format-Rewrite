@@ -4,7 +4,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import gameObjects.Boyfriend;
+import objects.Character;
 import song.Conductor;
 import states.MusicBeatState.MusicBeatSubstate;
 
@@ -63,13 +63,12 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (Controls.getPressEvent("back"))
 		{
+			PlayState.clearStored = true;
 			FlxG.sound.music.stop();
 			PlayState.deaths = 0;
 
-			if (PlayState.isStoryMode)
-			{
+			if (PlayState.gameplayMode == STORY)
 				Main.switchState(this, new states.menus.StoryMenu());
-			}
 			else
 				Main.switchState(this, new states.menus.FreeplayMenu());
 		}

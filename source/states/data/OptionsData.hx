@@ -22,10 +22,19 @@ class OptionsData
 		{name: 'Centered Notefield', type: "option"},
 		{name: 'Ghost Tapping', type: "option"},
 		//
+		{name: "Timing Windows", type: "divider"},
+		{name: "Timing Preset", type: "option"},
+		/*
+			{name: "Sick Timing Window", type: "option"},
+			{name: "Good Timing Window", type: "option"},
+			{name: "Bad Timing Window", type: "option"},
+			{name: "Shit Timing Window", type: "option"},
+		 */
+		//
 		{name: "Meta Settings", type: "divider"},
 		//
-		{name: 'Skip Text', type: "option"},
 		{name: 'Auto Pause', type: "option"},
+		{name: 'Skip Text', type: "option"},
 		{name: 'Framerate Cap', type: "option"},
 		{name: 'FPS Counter', type: "option"},
 		{name: 'Memory Counter', type: "option"},
@@ -43,6 +52,7 @@ class OptionsData
 		//
 		{name: "Motion Settings", type: "divider"},
 		//
+		{name: "Camera Position", type: "option"},
 		{name: "No Camera Note Movement", type: "option"},
 		{name: "Reduced Movements", type: "option"},
 		//
@@ -56,26 +66,30 @@ class OptionsData
 	/* == Visuals Group == */
 	public static var visuals:Array<GroupData> = [
 		//
-		{name: "User Interface Settings", type: "divider"},
+		{name: "User Interface", type: "divider"},
 		//
 		{name: "UI Skin", type: "option"},
+		{name: "Note Skin", type: "option"},
+		{name: "Clip Style", type: "option"},
+		//
+		{name: "Note and Holds", type: "divider"},
+		//
+		{name: "Arrow Opacity", type: "option"},
+		{name: "Hold Opacity", type: "option"},
+		{name: "Splash Opacity", type: "option"},
+		//
+		{name: "Judgements and Combo", type: "divider"},
+		//
 		{name: "Fixed Judgements", type: "option"},
 		{name: "Simply Judgements", type: "option"},
-		{name: "Opaque User Interface", type: "option"},
 		{name: "Judgement Recycling", type: "option"},
+		{name: "Display Miss Judgement", type: "option"},
+		{name: "Display Timings", type: "option"},
 		//
-		{name: "Text Settings", type: "divider"},
+		{name: "Text Display", type: "divider"},
 		//
+		{name: "Counter", type: "option"},
 		{name: 'Display Accuracy', type: "option"},
 		{name: "Accuracy Hightlight", type: "option"},
-		{name: "Counter", type: "option"},
-		//
-		{name: "Note Settings", type: "divider"},
-		//
-		{name: "Note Skin", type: "option"},
-		{name: "Disable Note Splashes", type: "option"},
-		{name: "Clip Style", type: "option"},
-		{name: "Arrow Opacity", type: "option"},
-		{name: "Hold Opacity", type: "option"}
 	];
 }

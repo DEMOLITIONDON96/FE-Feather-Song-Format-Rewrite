@@ -1,7 +1,5 @@
-- Scripted Notetypes;
-- (Proper) Script Error Handling;
-
-[LOW PRIORITY]
-- Mods Folder and proper Mod Support
+- More Robust Error Handling
+- Mod Support (somewhat, at least)
+- Improved Stability
 
 // Contributors, in case you wanna go ahead and try to implement any of these features, feel free to do so.

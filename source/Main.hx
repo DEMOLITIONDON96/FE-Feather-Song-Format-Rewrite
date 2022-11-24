@@ -3,9 +3,9 @@ package;
 import base.*;
 import base.Overlay.Console;
 import dependency.Discord;
-import dependency.FNFTransition;
+import dependency.FNFUtils.FNFGame;
+import dependency.FNFUtils.FNFTransition;
 import flixel.FlxG;
-import flixel.FlxGame;
 import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import haxe.CallStack;
@@ -23,7 +23,7 @@ typedef GameWeek =
 {
 	var songs:Array<WeekSong>;
 	var characters:Array<String>;
-	var ?difficulties:Array<String>;
+	@:optional var difficulties:Array<String>; // wip
 	var attachedImage:String;
 	var storyName:String;
 	var startsLocked:Bool;
@@ -40,77 +40,92 @@ typedef WeekSong =
 	var colors:Array<Int>;
 }
 
+typedef GameStruct =
+{
+	var width:Int;
+	var height:Int;
+	var mainState:Class<FlxState>;
+	var framerate:Int;
+	var skipSplash:Bool;
+	var versionFE:String;
+	var versionFF:String;
+}
+
 // Here we actually import the states and metadata, and just the metadata.
 // It's nice to have modularity so that we don't have ALL elements loaded at the same time.
 // at least that's how I think it works. I could be stupid!
 class Main extends Sprite
 {
-	// class action variables
-	public static var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	public static var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
+	public static var game:GameStruct = {
+		width: 1280, // game window width
+		height: 720, // game window height
+		mainState: states.TitleState, // the initial state the game should start at
+		framerate: 60, // the game's default framerate
+		skipSplash: true, // whether to skip the flixel splash screen that appears on release mode
+		versionFE: "0.3.1", // version of Forever Engine Legacy
+		versionFF: "0.1", // version of Forever Engine Feather
+	};
 
-	public static var mainClassState:Class<FlxState> = states.TitleState; // Determine the main class state of the game
-	public static var framerate:Int = 60; // How many frames per second the game should run at.
+	public static var baseGame:FNFGame;
 
-	public static var gameVersion:String = '0.3.1';
-	public static var featherVersion:String = '0.1';
+	private static var infoCounter:Overlay; // initialize the heads up display that shows information before creating it.
+	private static var infoConsole:Console; // intiialize the on-screen console for script debug traces before creating it.
 
-	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
-	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
-	var infoCounter:Overlay; // initialize the heads up display that shows information before creating it.
-	var infoConsole:Console; // intiialize the on-screen console for script debug traces before creating it.
+	// weeks set up!
+	public static var weeksMap:Map<String, GameWeek> = [];
+	public static var weeks:Array<String> = [];
 
-	public static var gameWeeksMap:Map<String, GameWeek> = [];
-	public static var gameWeeks:Array<String> = [];
+	/* public static function loadHardcodedWeeks()
+		{
+			weeksMap = [
+				"myWeek" => {
+					songs: [
+						{
+							"name": "Bopeebo",
+							"opponent": "dad",
+							"colors": [129, 100, 223]
+						}
+					],
 
-	// heres gameweeks set up!
-	// in case you wanna hardcode weeks
+					attachedImage: "week1",
+					storyName: "vs. DADDY DEAREST",
+					characters: ["dad", "bf", "gf"],
 
-	public static function loadHardcodedWeeks()
-	{
-		gameWeeksMap = [
-			"myWeek" => {
-				songs: [
-					{
-						"name": "Bopeebo",
-						"opponent": "dad",
-						"colors": [129, 100, 223]
-					}
-				],
-
-				attachedImage: "week1",
-				storyName: "vs. DADDY DEAREST",
-				characters: ["dad", "bf", "gf"],
-
-				startsLocked: false,
-				hideOnStory: false,
-				hideOnFreeplay: false,
-				hideUntilUnlocked: false
-			}
-		];
-		gameWeeks.push('myWeek');
-	}
-
+					startsLocked: false,
+					hideOnStory: false,
+					hideOnFreeplay: false,
+					hideUntilUnlocked: false
+				}
+			];
+			gameWeeks.push('myWeek');
+	}*/
 	public static function loadGameWeeks(isStory:Bool)
 	{
-		gameWeeksMap.clear();
-		gameWeeks = [];
+		weeksMap.clear();
+		weeks = [];
+
+		// loadHardcodedWeeks();
 
 		var weekList:Array<String> = CoolUtil.coolTextFile(Paths.txt('weeks/weekList'));
 		for (i in 0...weekList.length)
 		{
-			if (!gameWeeksMap.exists(weekList[i]))
+			if (!weeksMap.exists(weekList[i]))
 			{
-				var week:GameWeek = parseGameWeeks(Paths.file('weeks/' + weekList[i] + '.json'));
-				if (week != null)
+				if (weekList[i].length > 1)
 				{
-					if ((isStory && (!week.hideOnStory && !week.hideUntilUnlocked))
-						|| (!isStory && (!week.hideOnFreeplay && !week.hideUntilUnlocked)))
+					var week:GameWeek = parseGameWeeks(Paths.file('weeks/' + weekList[i] + '.json'));
+					if (week != null)
 					{
-						gameWeeksMap.set(weekList[i], week);
-						gameWeeks.push(weekList[i]);
+						if ((isStory && (!week.hideOnStory && !week.hideUntilUnlocked))
+							|| (!isStory && (!week.hideOnFreeplay && !week.hideUntilUnlocked)))
+						{
+							weeksMap.set(weekList[i], week);
+							weeks.push(weekList[i]);
+						}
 					}
 				}
+				else
+					weeks = null;
 			}
 		}
 	}
@@ -154,28 +169,13 @@ class Main extends Sprite
 		// if you've used gamemaker you'll probably understand the term surface better
 		// this defines the surface bounds
 
-		var stageWidth:Int = Lib.current.stage.stageWidth;
-		var stageHeight:Int = Lib.current.stage.stageHeight;
-
-		if (zoom == -1)
-		{
-			var ratioX:Float = stageWidth / gameWidth;
-			var ratioY:Float = stageHeight / gameHeight;
-			zoom = Math.min(ratioX, ratioY);
-			gameWidth = Math.ceil(stageWidth / zoom);
-			gameHeight = Math.ceil(stageHeight / zoom);
-			// this just kind of sets up the camera zoom in accordance to the surface width and camera zoom.
-			// if set to negative one, it is done so automatically, which is the default.
-		}
-
 		FlxTransitionableState.skipNextTransIn = true;
 
 		SUtil.checkPermissions();
 
 		// here we set up the base game
-		var gameCreate:FlxGame;
-		gameCreate = new FlxGame(gameWidth, gameHeight, Init, #if (flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash);
-		addChild(gameCreate); // and create it afterwards
+		baseGame = new FNFGame(game.width, game.height, Init, game.framerate, game.framerate, game.skipSplash);
+		addChild(baseGame); // and create it afterwards
 
 		// initialize the game controls;
 		Controls.init();
@@ -206,7 +206,7 @@ class Main extends Sprite
 		#if DISCORD_RPC
 		Discord.shutdownRPC();
 		#end
-		openfl.system.System.exit(1);
+		Sys.exit(1);
 	}
 
 	public static function framerateAdjust(input:Float)
@@ -222,7 +222,7 @@ class Main extends Sprite
 	public static function switchState(curState:FlxState, target:FlxState)
 	{
 		// Custom made Trans in
-		mainClassState = Type.getClass(target);
+		Main.game.mainState = Type.getClass(target);
 		if (!FlxTransitionableState.skipNextTransIn)
 		{
 			curState.openSubState(new FNFTransition(0.35, false));
@@ -264,7 +264,7 @@ class Main extends Sprite
 		dateNow = StringTools.replace(dateNow, " ", "_");
 		dateNow = StringTools.replace(dateNow, ":", "'");
 
-		path = "crash/" + "FE_" + dateNow + ".txt";
+		path = "crash/" + "Feather_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -278,7 +278,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nPlease report this error to the GitHub page: https://github.com/BeastlyGhost/Forever-Engine-Feather";
+		errMsg += "\nUncaught Error: " + e.error + " - Please report this error to the\nGitHub page https://github.com/BeastlyGhost/Forever-Engine-Feather";
 
 		if (!FileSystem.exists("crash/"))
 			FileSystem.createDirectory("crash/");
@@ -288,7 +288,7 @@ class Main extends Sprite
 		Sys.println(errMsgPrint);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
-		var crashDialoguePath:String = "FE-CrashDialog";
+		var crashDialoguePath:String = "FEF-CrashDialog";
 
 		#if windows
 		crashDialoguePath += ".exe";

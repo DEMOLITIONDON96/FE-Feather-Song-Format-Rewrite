@@ -28,7 +28,8 @@ class Conductor
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
 
 	public static var songPosition:Float;
-	public static var lastSongPos:Float;
+	public static var lastPosition:Float;
+	public static var shouldStartSong:Bool = false;
 	public static var offset:Float = 0;
 
 	/*

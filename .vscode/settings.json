@@ -5,7 +5,7 @@
 	"[haxe]": {
 		"editor.formatOnPaste": true,
 		"editor.codeActionsOnSave": {
-			"source.sortImports": false
+			"source.sortImports": true
 		}
 	},
 	"haxe.enableExtendedIndentation": true,

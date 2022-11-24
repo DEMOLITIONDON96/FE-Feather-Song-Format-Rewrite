@@ -1,9 +1,9 @@
 function eventTrigger(params)
 {
-	var speed:Int = Std.parseInt(params[0]);
-	if (Math.isNaN(speed) || speed <= 0)
+	var value:Int = Std.parseInt(params[0]);
+	if (Math.isNaN(value) || value <= 0)
 		speed = 1;
-	PlayState.gfSpeed = speed;
+	game.gfSpeed = value;
 }
 
 function returnDescription()

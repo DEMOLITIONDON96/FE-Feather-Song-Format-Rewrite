@@ -1,14 +1,15 @@
 package states.data;
 
-import flixel.FlxBasic;
-import states.data.OptionsData.GroupData;
-import gameObjects.gameFonts.Alphabet;
 import dependency.Discord;
+import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import gameObjects.userInterface.menu.Checkmark;
-import gameObjects.userInterface.menu.Selector;
+import flixel.math.FlxMath;
+import objects.fonts.Alphabet;
+import objects.ui.menu.Checkmark;
+import objects.ui.menu.Selector;
 import states.MusicBeatState;
+import states.data.OptionsData.GroupData;
 
 /**
  * The Base Options class manages Option Attachments;
@@ -20,7 +21,7 @@ import states.MusicBeatState;
 class BaseOptions extends MusicBeatState
 {
 	/*
-		== OPTIONS MENU DOCUMENTATION ==
+		== OPTIONS DOCUMENTATION ==
 
 		to set up a category, add to the categoriesMap
 		format should be this;
@@ -60,8 +61,6 @@ class BaseOptions extends MusicBeatState
 
 	public var activeGroup:Array<GroupData> = [];
 
-	public var lockedMovement:Bool = false;
-
 	public var curSelected:Int = 0;
 	public var curCategory:String = 'main';
 
@@ -86,6 +85,15 @@ class BaseOptions extends MusicBeatState
 
 		if (attachmentsGroup != null)
 			repositionAttachments();
+
+		if (activeGroup != null)
+		{
+			for (i in 0...activeGroup.length)
+			{
+				if (activeGroup[i].type == "divider") // skip dividers;
+					alphabetGroup.members[i].alpha = 0.6;
+			}
+		}
 	}
 
 	function repositionAttachments()
@@ -138,16 +146,14 @@ class BaseOptions extends MusicBeatState
 
 		// reset selection;
 		curSelected = 0;
+		updateSelections(curSelected);
 	}
 
-	public function updateSelections(newSelection:Int = 0)
+	public function updateSelections(newSelection:Int)
 	{
-		curSelected += newSelection;
-
-		if (curSelected < 0)
-			curSelected = activeGroup.length - 1;
-		else if (curSelected >= activeGroup.length)
-			curSelected = 0;
+		// direction increment finder
+		var directionIncrement = ((newSelection < curSelected) ? -1 : 1);
+		curSelected = FlxMath.wrap(newSelection, 0, activeGroup.length - 1);
 
 		// define the description;
 		if (Init.gameSettings.get(alphabetGroup.members[curSelected].text) != null)
@@ -166,16 +172,21 @@ class BaseOptions extends MusicBeatState
 			bullShit++;
 
 			item.alpha = 0.6;
-
 			if (item.targetY == 0)
 				item.alpha = 1;
 
 			if (attachmentsMap != null)
 				setAttachmentAlpha(attachmentsMap.get(item), item.alpha);
 		}
+
+		for (i in 0...activeGroup.length)
+		{
+			if (activeGroup[curSelected].type == "divider")
+				updateSelections(curSelected + directionIncrement);
+		}
 	}
 
-	function setAttachmentAlpha(attachment:flixel.FlxSprite, newAlpha:Float)
+	inline function setAttachmentAlpha(attachment:flixel.FlxSprite, newAlpha:Float)
 	{
 		// oddly enough, you can't set alphas of objects that arent directly and inherently defined as a value.
 		// ya flixel is weird lmao
@@ -202,12 +213,23 @@ class BaseOptions extends MusicBeatState
 		{
 			var option = groupArray[i];
 
-			if (option.type != null && (Init.gameSettings.get(option.name) == null || Init.gameSettings.get(option.name) != Init.FORCED))
+			if (option.type != null
+				&& (Init.gameSettings.get(option.name) == null || Init.gameSettings.get(option.name) != Init.SettingState.FORCED))
 			{
 				var thisOption:Alphabet = new Alphabet(160, 0, option.name, true, false);
-				thisOption.screenCenter();
-				thisOption.y += (125 * (i - Math.floor(groupArray.length / 2)));
-				thisOption.y += 75; // probably shouldn't do this but yeah;
+				if (option.type != "divider")
+				{
+					thisOption.screenCenter();
+					thisOption.y += (125 * (i - Math.floor(groupArray.length / 2)) + 75);
+				}
+				else
+				{
+					// hardcoded divider centering lol;
+					thisOption.screenCenter(X);
+					thisOption.forceX = thisOption.x;
+					thisOption.yAdd = -55;
+					thisOption.scrollFactor.set();
+				}
 				thisOption.targetY = i;
 				thisOption.disableX = true;
 				// the main category shouldn't scroll;
@@ -248,10 +270,12 @@ class BaseOptions extends MusicBeatState
 						// checkmark
 						var checkmark = ForeverAssets.generateCheckmark(10, option.y, 'checkboxThingie', 'base', Init.trueSettings.get("UI Skin"), 'UI');
 						checkmark.playAnim(Std.string(Init.trueSettings.get(option.text)) + ' finished');
+						checkmark.scrollFactor.set();
 						tempMap.set(option, checkmark);
 					case Init.SettingTypes.Selector:
 						// selector
 						var selector:Selector = new Selector(10, option.y, option.text, Init.gameSettings.get(option.text)[4]);
+						selector.scrollFactor.set();
 						tempMap.set(option, selector);
 					default:
 						// dont do ANYTHING
@@ -312,8 +336,6 @@ class BaseOptions extends MusicBeatState
 					setupSelector(updateBy, selector, 30, 360, 15);
 				case 'Darkness Opacity':
 					setupSelector(updateBy, selector, 0, 100, 5);
-				case 'Arrow Opacity' | 'Hold Opacity':
-					setupSelector(updateBy, selector, 0, 100, 1);
 				default:
 					setupSelector(updateBy, selector);
 			}
